@@ -3,13 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/schema/mybatis-3-mapper.dtd">
 <mapper namespace="goods">
+    <!-- 开启二级缓存 -->
+    <cache eviction="LRU" flushInterval="600000" size="512" readOnly="true"/>
     <resultMap id="rmGoods" type="org.example.dto.GoodsDTO">
         <!--设置主键字段与属性映射-->
         <id property="goods.goodsId" column="goods_id"/>
         <!--设置非主键字段与属性映射-->
         <result property="goods.title" column="title"/>
         <result property="goods.originalCost" column="original_cost"/>
-        <result property="goods.currentPrice" column="current_price"/>
         <result property="goods.discount" column="discount"/>
         <result property="goods.isFreeDelivery" column="is_free_delivery"/>
         <result property="goods.categoryId" column="category_id"/>
@@ -86,4 +87,47 @@
             </if>
         </where>
     </select>
+    <!--
+    resultMap可用于说明一对多或者多对一的映射逻辑
+    id 是resultMap属性引用的标志
+    type 指向One的实体(Goods)
+-->
+    <resultMap id="rmGoods1" type="org.example.entity.Goods">
+        <!-- 映射goods对象的主键到goods_id字段 -->
+        <id column="goods_id" property="goodsId"/>
+        <!--
+            collection的含义是,在
+            select * from t_goods limit 0,1 得到结果后,对所有Goods对象遍历得到goods_id字段值,
+            并代入到goodsDetail命名空间的findByGoodsId的SQL中执行查询,
+            将得到的"商品详情"集合赋值给goodsDetails List对象.
+        -->
+        <collection property="goodsDetails" select="goodsDetail.selectByGoodsId"
+                    column="goods_id"/>
+    </resultMap>
+
+    <select id="selectOneToMany" resultMap="rmGoods1">
+        select * from t_goods limit 0,10
+    </select>
+
+
+    <select id="selectPage" resultType="org.example.entity.Goods">
+        select * from t_goods where current_price &lt; 1000
+    </select>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_goods(title, sub_title, original_cost, current_price, discount, is_free_delivery, category_id)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.title},#{item.subTitle},
+            #{item.originalCost}, #{item.currentPrice},
+            #{item.discount}, #{item.isFreeDelivery},
+            #{item.categoryId})
+        </foreach>
+    </insert>
+    <delete id="batchDelete" parameterType="java.util.List">
+        DELETE FROM t_goods WHERE goods_id in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
 </mapper>

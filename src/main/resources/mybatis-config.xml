@@ -7,18 +7,38 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
         <setting name="logImpl" value="SLF4J"/>
     </settings>
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!-- 设置数据库类型 -->
+            <property name="helperDialect" value="mysql"/>
+            <!-- 设置分页合理化 过滤不合理分页 -->
+            <property name="reasonable" value="true"/>
+        </plugin>
+    </plugins>
     <environments default="dev">
         <environment id="dev">
             <transactionManager type="JDBC"/>
-            <dataSource type="POOLED">
-                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://localhost:3306/babytun?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;allowPublicKeyRetrieval=true"/>
-                <property name="username" value="root"/>
+<!--            <dataSource type="POOLED">-->
+<!--                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>-->
+<!--                <property name="url" value="jdbc:mysql://localhost:3306/babytun?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;allowPublicKeyRetrieval=true"/>-->
+<!--                <property name="username" value="root"/>-->
+<!--                <property name="password" value="12345678"/>-->
+<!--            </dataSource>-->
+            <dataSource type="org.example.datasource.C3P0DataSourceFactory">
+                <property name="driverClass" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/babytun?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;allowPublicKeyRetrieval=true"/>
+                <property name="user" value="root"/>
                 <property name="password" value="12345678"/>
+                <property name="initialPoolSize" value="5"/>
+                <property name="maxPoolSize" value="20"/>
+                <property name="minPoolSize" value="5"/>
             </dataSource>
         </environment>
     </environments>
     <mappers>
-        <mapper resource="mappers/goods.xml"/>
+<!--        <mapper resource="mappers/goods.xml"/>-->
+<!--        <mapper resource="mappers/goods_detail.xml"/>-->
+<!--        <mapper class="org.example.dao.GoodsDAO"/>-->
+        <package name="org.example.dao"/>
     </mappers>
 </configuration>
